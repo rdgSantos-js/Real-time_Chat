@@ -1,0 +1,26 @@
+/* Arquivo para "reset" de estilos */
+* {
+    margin: 0;
+    padding: 0;
+    outline: none;
+    list-style: none;
+    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    margin-block-start: 0em;
+    margin-block-end: 0em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 0px;
+
+}
+*:focus{
+    outline: none;
+}
+.row{
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+}
+html {
+  height: 100%;
+}

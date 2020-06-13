@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Real-time Chat by Rodrigo S. Silva</title>
+
+	<!-- Estilos -->
+	<link rel="stylesheet" href="./assets/css/_reset.css">
+	<link rel="stylesheet" href="./assets/css/login.css">
+	<link rel="stylesheet" href="./assets/css/chat.css">
+
+	<!-- Grid System e Flexbox do Bootstrap 4 -->
+	<link rel="stylesheet" href="./assets/css/bootstrap-grid.min.css">
+
+	<!-- Fontes -->
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Josefin+Slab:wght@300&display=swap" rel="stylesheet">
+
+
+</head>
+<style>
+	/* Configuração da diretiva v-cloak do Vue.js */
+	[v-cloak]{
+		display: none;
+	}
+
+	/* Cor de fundo do <body> */
+	body{  
+	    background-image: linear-gradient(to right, #5465FF, #BFD7FF);
+	}
+
+	/* Configuração do <main> */
+	main{
+		position: absolute;
+		top: 3rem;
+		z-index: 3;
+		width: 100%;
+		bottom: 4rem;
+		overflow: auto;
+	}
+
+	/* Configuração do rodápé da página de login */
+	footer{
+		background-color: #252422;
+		position: fixed;
+		display: block;
+		bottom: 0;
+		width: 100%;
+		height: 3rem;
+	}
+	footer p, footer i, footer a{
+		color: #FFFCF2;
+		font-size: .7rem;
+	}
+	footer a{
+		color: #5465FF;
+	}
+</style>
+
+<!-- Dispara evento do socket.io que informa a saída de um usuário -->
+
+<body onunload="return chatView.userLogOut()">
+
+	<div id="app" v-cloak>
+	
+		<!-- Página de login -->
+
+		<div 
+		v-if="!user">
+
+		<!-- Formulário de login -->
+
+			<div
+			id="login" 
+			class="d-flex justify-content-center align-items-center"
+			>
+					
+				<form
+				@submit="userLogIn($event)" 
+				class="d-flex justify-content-center flex-column"
+				>
+					<input type="text" placeholder="Nickname:">
+					<button>ENTRAR</button>
+				</form>
+
+			</div>
+		
+			<!-- Rodapé -->
+
+			<footer class="d-flex justify-content-center align-items-center">
+
+				<p>Real time chat desenvolvido por 
+					<a href="https://www.linkedin.com/in/rodrigo-s-silva-5706b1192/" target="_blank">
+						Rodrigo S. Silva
+					</a>
+				&copy; 2020</p>				
+
+			</footer>
+
+		</div>
+		
+
+		<div id="chat" v-else>
+
+			<!-- Barra superior -->
+
+			<div id="menu-bar" class="d-flex align-items-center">
+				<div class="mr-auto ml-4">
+					<h3 class="d-flex flex-column align-items-center">
+						<small style="font-size: .5rem">LOGADO COMO:</small>
+						{{ user }}
+					</h3>
+				</div>
+				<button @click="userLogOut()" class="mr-4" title="Deslogar"><i class='fas fa-door-open'></i></button>
+			</div>
+			
+			<!-- Chat -->
+
+			<main>
+				<ul id="messages" class="mx-2">
+					<li v-for="event in eventList" class="py-2" v-cloak>
+
+						<div class="my-message d-flex justify-content-end" v-if="event.type==='eventMsg' && event.user === user">
+							<div class="chat-box">
+								<p class="message">{{event.value}}</p>
+							</div>
+						</div>
+
+						<div class="chat-message d-flex justify-content-start" v-if="event.type==='eventMsg' && event.user !== user">
+							<div class="chat-box">
+								<small class="author">{{event.user}}</small>
+								<p class="message">{{event.value}}</p>
+								<p class="date d-flex justify-content-end">
+								{{event.createdAt.date | date}}
+								{{event.createdAt.time | time}}</p>
+							</div>
+						</div>
+
+						<div class="info-message d-flex justify-content-center" v-if="event.type==='infoMsg'">
+							<p>{{event.value}}</p>
+						</div>
+
+					</li>
+				</ul>
+			</main>
+
+			<!-- Formulário de envio de mensagens -->
+
+			<form @submit="submitMessage($event)" class="d-flex align-items-center">
+				<input type="text" class="d-flex mr-auto">
+				<button class="d-inline-flex align-items-center"><i class='fas fa-paper-plane mx-1'></i>Enviar</button>
+			</form>
+
+		</div>
+
+	</div>
+
+
+<!-- Font Awesome -->
+<script src="https://kit.fontawesome.com/1235ede893.js" crossorigin="anonymous"></script>
+
+<!-- Socket.io	 -->
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- Vue.js -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<!-- Configuração do chat -->
+<script src="./model/chat.js"></script>
+
+</body>
+</html>
