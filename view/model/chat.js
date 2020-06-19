@@ -1,7 +1,7 @@
 /* Arquivo das configurações do client-side */
 
 //Invoca o socket.io no lado do cliente
-let socket = io();
+let socket = io()
 
 // Instância Vue.js
 let chatView = new Vue({
@@ -17,7 +17,7 @@ let chatView = new Vue({
 		// Quando o usuário entra no chat, a informação é disparada para o socket.io no server-side
 		user: (newName)=>{
 			if(newName){
-				socket.emit('user-connect', newName);
+				socket.emit('user-connect', newName)
 			}	
 		},
 
@@ -29,8 +29,10 @@ let chatView = new Vue({
 		*/
 		eventList: ()=>{
 
-				let ul = document.querySelector('#chat ul').getBoundingClientRect().bottom
-				let main = document.querySelector('main').getBoundingClientRect().bottom
+			let main = document.querySelector('main')
+
+			if(main !== null){
+
 				let lastMsg = document.querySelector('#chat ul#messages li:last-child')
 
 
@@ -38,7 +40,9 @@ let chatView = new Vue({
 
 					let lastMsgPos = lastMsg.getBoundingClientRect().bottom
 
-					if((main + 20) > lastMsgPos && lastMsgPos > (main - 20)){
+					if(
+						(main.getBoundingClientRect().bottom + 20) > lastMsgPos 
+						&& lastMsgPos > (main.getBoundingClientRect().bottom - 20)){
 
 						setTimeout(e=>{
 
@@ -50,6 +54,7 @@ let chatView = new Vue({
 					}
 
 				}
+			}
 		}
 	},
 	filters:{
@@ -73,7 +78,7 @@ let chatView = new Vue({
 			else if(msgDay == day - 1 && msgMonth == month){
 				return 'Hoje - '
 			}else{
-				return date;
+				return date
 			}
 		}
 	},
@@ -81,16 +86,53 @@ let chatView = new Vue({
 
 		// Método para login e logout do usuário
 		userLogIn(e){
-			e.preventDefault();
-			let newUser = e.target[0].value;
+
+			e.preventDefault()
+			let d = new Date()	
+
+			let newUser = e.target[0].value
+
 			if(newUser){
 				this.user = newUser
+
+				let userObj = {
+					value: this.user + ' entrou',
+					createdAt: this.getFormattedDate(d),
+					type: 'infoMsg'
+				}
+
 				e.target[0].value = ''
+
+				console.log(userObj)
+
+				socket.emit('user-connect', userObj)
 			}
+
+			// Recupera os eventos do banco de dados
+			fetch('/msg')
+			.then(res=>res.json())
+			.then(response=>{
+				this.eventList = response
+			})
+
+			setTimeout(e=>{
+				let lastMsg = document.querySelector('#chat ul#messages li:last-child')
+				lastMsg.scrollIntoView()
+			},300)
+
 		},
 		userLogOut(){
-			socket.emit('user-disconnect', this.user)
-			this.user = '';
+
+			let d = new Date()	
+
+			let userObj = {
+				value: this.user + ' saiu',
+				createdAt: this.getFormattedDate(d),
+				type: 'infoMsg'
+			}
+
+			if(this.user) {socket.emit('user-disconnect', userObj)}
+			this.user = ''
 		},
 
 		// Método de envio de mensagens
@@ -102,12 +144,13 @@ let chatView = new Vue({
 
 			if(value!==''){
 				let d = new Date()	
-				let user = this.user;
+				let user = this.user
 
 				let msgObject = {
 					user,
 					value,
-					date: this.getFormattedDate(d)
+					createdAt: this.getFormattedDate(d),
+					type: 'eventMsg'
 				}
 
 				socket.emit('chat-message', msgObject)
@@ -143,7 +186,7 @@ let chatView = new Vue({
       		this.eventList.push({
       			user: msgInfo.user,
       			value: msgInfo.value,
-      			createdAt: msgInfo.date,
+      			createdAt: msgInfo.createdAt,
       			type: 'eventMsg'
       		})
     	})
